@@ -11,7 +11,7 @@ struct ExamSelectionView: View {
     @State private var navigateToMenu = false
 // TODO: Setup probably an init function for this view that accepts the callback you need to call when you select a cluster. That callback will take one argument (the cluster) and return void.
     var body: some View {
-        NavigationStack { // TODP: ditch this
+        NavigationStack { // TODO: ditch this
             ZStack {
                 Color(.systemBackground).ignoresSafeArea()
 
