@@ -9,9 +9,9 @@ struct ExamSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedCluster: ExamCluster? = nil
     @State private var navigateToMenu = false
+    var onClusterSelected: (ExamCluster) -> Void
 // TODO: Setup probably an init function for this view that accepts the callback you need to call when you select a cluster. That callback will take one argument (the cluster) and return void.
     var body: some View {
-        NavigationStack { // TODO: ditch this
             ZStack {
                 Color(.systemBackground).ignoresSafeArea()
 
@@ -52,8 +52,9 @@ struct ExamSelectionView: View {
 
                     // Continue button
                     Button(action: {
-                        if selectedCluster != nil {
-                            navigateToMenu = true
+                        if let cluster = selectedCluster {
+                            onClusterSelected(cluster)
+                            dismiss()
                         }
                     }) {
                         Text("Continue")
@@ -76,7 +77,6 @@ struct ExamSelectionView: View {
                     MenuPageView(cluster: cluster)
                 }
             }
-        }
     }
 }
 
@@ -144,5 +144,5 @@ struct ClusterRow: View {
 }
 
 #Preview {
-    ExamSelectionView()
+    ExamSelectionView(onClusterSelected: { _ in })
 }
