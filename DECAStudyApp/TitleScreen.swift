@@ -15,7 +15,7 @@ struct TitleScreen: View {
                 VStack(spacing: 30) {
                     Spacer()
 
-                    // Logo placeholder (replace "DECA_Logo" with your asset name)
+                    
                     ZStack {
                         Circle()
                             .fill(Color.white)
@@ -48,7 +48,7 @@ struct TitleScreen: View {
                 }
                 .navigationBarHidden(true)
                 .sheet(isPresented: $showExamPicker) {
-                    ExamSelectionView()
+                    ExamSelectionView(/* TODO: Pass in a function that runs in the TitleScreen to dismiss the sheet and then mount the next view with the selected cluster */)
                 }
             }
         }

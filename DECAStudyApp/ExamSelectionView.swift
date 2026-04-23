@@ -9,9 +9,9 @@ struct ExamSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedCluster: ExamCluster? = nil
     @State private var navigateToMenu = false
-
+// TODO: Setup probably an init function for this view that accepts the callback you need to call when you select a cluster. That callback will take one argument (the cluster) and return void.
     var body: some View {
-        NavigationStack {
+        NavigationStack { // TODP: ditch this
             ZStack {
                 Color(.systemBackground).ignoresSafeArea()
 
@@ -72,6 +72,7 @@ struct ExamSelectionView: View {
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToMenu) {
                 if let cluster = selectedCluster {
+                    // TODO: Call the fn passed into this view to tell the parent VC what was chosen
                     MenuPageView(cluster: cluster)
                 }
             }
