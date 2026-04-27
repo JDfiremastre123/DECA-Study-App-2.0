@@ -31,7 +31,7 @@ struct SettingsView: View {
                         .foregroundColor(.white.opacity(0.6))
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 60)
+                .padding(.top, 10)
                 .padding(.bottom, 24)
 
                 // ── Form ─────────────────────────────────────────────────
