@@ -48,8 +48,8 @@ struct MenuPageView: View {
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 60)
-                .padding(.bottom, 20)
+                .padding(.top, 0.0)
+                
 
                 Spacer()
 
