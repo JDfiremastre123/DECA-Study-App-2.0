@@ -52,7 +52,7 @@ struct StudyModeView: View {
             VStack(spacing: 0) {
                 // ── Header ───────────────────────────────────────────────
                 ZStack {
-                    Color.gray.opacity(0.15)
+                    Color(cluster.color)
                     HStack {
                         Button(action: { dismiss() }) {
                             Image(systemName: "arrowshape.backward.circle")
@@ -66,15 +66,16 @@ struct StudyModeView: View {
                                 .foregroundColor(.primary)
                             Text("Study Mode · \(allTerms.count) terms")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.black)
                         }
                         Spacer()
-                        Image(systemName: "lightbulb.fill")
+                        Image(systemName: cluster.iconName)
                             .font(.title2)
-                            .foregroundColor(.yellow)
+                            .foregroundColor(.white)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 14)
+                    .padding(.top, 100)
+                    .padding(.bottom, 100)
                 }
                 .frame(height: 80)
 

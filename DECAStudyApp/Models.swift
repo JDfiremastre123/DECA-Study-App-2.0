@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SwiftUICore
 
 // MARK: - Exam Cluster
 enum ExamCluster: String, CaseIterable, Identifiable {
@@ -26,6 +27,17 @@ enum ExamCluster: String, CaseIterable, Identifiable {
         case .hospitality:     return "globe"
         case .marketing:       return "iphone.gen2"
         case .personalFinance: return "creditcard.fill"
+        }
+    }
+    var color: Color {
+        switch self{
+        case .businessAdmin: return Color(red: 28, green: 60, blue: 99)
+        case .businessMgmt: return .yellow
+        case .entrepreneurship: return .gray
+        case .finance: return .green
+        case .hospitality: return .blue
+        case .marketing: return .red
+        case .personalFinance: return Color(red: 145, green: 197, blue: 90)
         }
     }
 
