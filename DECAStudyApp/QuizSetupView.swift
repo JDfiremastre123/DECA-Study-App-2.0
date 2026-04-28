@@ -19,7 +19,6 @@ struct QuizSetupView: View {
             VStack(spacing: 0) {
                 // ── Header ───────────────────────────────────────────────
                 ZStack {
-                    Color.gray.opacity(0.15)
                     HStack {
                         Button(action: { dismiss() }) {
                             Image(systemName: "arrowshape.backward.circle")
@@ -30,16 +29,16 @@ struct QuizSetupView: View {
                             Text(cluster.rawValue.uppercased())
                                 .font(.system(size: 16, weight: .heavy))
                             Text("Quiz Mode")
-                                .font(.caption).foregroundColor(.secondary)
+                                .font(.caption).foregroundColor(.black)
                         }
                         Spacer()
                         Image(systemName: "checklist")
-                            .font(.title2).foregroundColor(.blue)
+                            .font(.title2).foregroundColor(.white)
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 14)
                 }
-                .frame(height: 80)
+                .frame(height: 80).background(cluster.color)
 
                 Spacer()
 
@@ -77,7 +76,7 @@ struct QuizSetupView: View {
                             .background(
                                 RoundedRectangle(cornerRadius: 14)
                                     .fill(selectedLength == length && available
-                                          ? Color.blue
+                                          ? cluster.color
                                           : Color(.secondarySystemBackground))
                             )
                         }
@@ -95,7 +94,7 @@ struct QuizSetupView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 60)
-                        .background(Color.blue)
+                        .background(cluster.color)
                         .cornerRadius(16)
                 }
                 .padding(.horizontal, 24)

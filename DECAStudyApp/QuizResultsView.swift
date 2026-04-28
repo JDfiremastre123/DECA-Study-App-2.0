@@ -103,17 +103,17 @@ struct QuizResultsView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color.blue)
+                            .background(cluster.color)
                             .cornerRadius(14)
                     }
 
                     Button(action: onExit) {
                         Label("Back to Menu", systemImage: "house.fill")
                             .font(.headline).fontWeight(.semibold)
-                            .foregroundColor(.blue)
+                            .foregroundColor(cluster.color)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color.blue.opacity(0.1))
+                            .background(cluster.color.opacity(0.1))
                             .cornerRadius(14)
                     }
                 }

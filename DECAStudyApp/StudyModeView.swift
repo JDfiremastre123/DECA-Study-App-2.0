@@ -52,7 +52,6 @@ struct StudyModeView: View {
             VStack(spacing: 0) {
                 // ── Header ───────────────────────────────────────────────
                 ZStack {
-                    Color(cluster.color)
                     HStack {
                         Button(action: { dismiss() }) {
                             Image(systemName: "arrowshape.backward.circle")
@@ -74,10 +73,10 @@ struct StudyModeView: View {
                             .foregroundColor(.white)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 100)
-                    .padding(.bottom, 100)
+                    .padding(.vertical, 14)
                 }
                 .frame(height: 80)
+                .background(cluster.color)
 
                 // ── Search bar ───────────────────────────────────────────
                 HStack {

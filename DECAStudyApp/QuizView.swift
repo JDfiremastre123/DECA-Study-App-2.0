@@ -48,7 +48,6 @@ struct QuizView: View {
                 VStack(spacing: 0) {
                     // ── Header ─────────────────────────────────────────
                     ZStack {
-                        Color.gray.opacity(0.15)
                         HStack {
                             Button(action: { dismiss() }) {
                                 Image(systemName: "arrowshape.backward.circle")
@@ -59,16 +58,16 @@ struct QuizView: View {
                                 Text(cluster.rawValue.uppercased())
                                     .font(.system(size: 15, weight: .heavy))
                                 Text("\(currentIndex + 1) / \(questions.count)")
-                                    .font(.caption).foregroundColor(.secondary)
+                                    .font(.caption).foregroundColor(.black)
                             }
                             Spacer()
-                            Image(systemName: "lightbulb")
-                                .font(.title2).foregroundColor(.yellow)
+                            Image(systemName: cluster.iconName)
+                                .font(.title2).foregroundColor(.white)
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 14)
                     }
-                    .frame(height: 80)
+                    .frame(height: 80).background(cluster.color)
 
                     // ── Progress bar ───────────────────────────────────
                     GeometryReader { geo in
