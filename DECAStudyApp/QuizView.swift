@@ -161,7 +161,7 @@ struct QuizView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color.blue)
+                            .background(cluster.color)
                             .cornerRadius(14)
                         }
                         .padding(.horizontal, 20)
