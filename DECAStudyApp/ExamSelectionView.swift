@@ -10,7 +10,6 @@ struct ExamSelectionView: View {
     @State private var selectedCluster: ExamCluster? = nil
     @State private var navigateToMenu = false
     var onClusterSelected: (ExamCluster) -> Void
-// TODO: Setup probably an init function for this view that accepts the callback you need to call when you select a cluster. That callback will take one argument (the cluster) and return void.
     var body: some View {
             ZStack {
                 Color(.systemBackground).ignoresSafeArea()
