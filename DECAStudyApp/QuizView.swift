@@ -20,6 +20,7 @@ struct QuizView: View {
     @State private var score = 0
     @State private var showResults = false
     @State private var incorrectQuestions: [QuizQuestion] = []
+    @State private var examSaved = false
 
     private var current: QuizQuestion? {
         guard currentIndex < questions.count else { return nil }
@@ -189,8 +190,21 @@ struct QuizView: View {
         if currentIndex + 1 < questions.count {
             currentIndex += 1
         } else {
+            saveExamRecord()
             showResults = true
         }
+    }
+
+    private func saveExamRecord() {
+        guard !examSaved else { return }
+        examSaved = true
+        let record = ExamRecord(
+            cluster: cluster,
+            score: score,
+            total: questions.count,
+            missedQuestions: incorrectQuestions
+        )
+        settings.saveExam(record)
     }
 
     private func resetQuiz() {
@@ -200,6 +214,7 @@ struct QuizView: View {
         showExplanation = false
         showResults = false
         incorrectQuestions = []
+        examSaved = false
         loadQuestions()
     }
 
@@ -282,3 +297,4 @@ struct AnswerButton: View {
             .environmentObject(SettingsManager())
     }
 }
+
