@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8FB8EABA2FC7529400AB66FA /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FB8EAB92FC7529400AB66FA /* FirebaseCore */; };
+		8FB8EABC2FC7529400AB66FA /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8FB8EABB2FC7529400AB66FA /* FirebaseDatabase */; };
+		8FB8EABE2FC7529400AB66FA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FB8EABD2FC7529400AB66FA /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		FCB403132F96759D00876787 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +58,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8FB8EABC2FC7529400AB66FA /* FirebaseDatabase in Frameworks */,
+				8FB8EABA2FC7529400AB66FA /* FirebaseCore in Frameworks */,
+				8FB8EABE2FC7529400AB66FA /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +121,9 @@
 			);
 			name = DECAStudyApp;
 			packageProductDependencies = (
+				8FB8EAB92FC7529400AB66FA /* FirebaseCore */,
+				8FB8EABB2FC7529400AB66FA /* FirebaseDatabase */,
+				8FB8EABD2FC7529400AB66FA /* FirebaseFirestore */,
 			);
 			productName = DECAStudyApp;
 			productReference = FCB403022F96759A00876787 /* DECAStudyApp.app */;
@@ -196,6 +208,7 @@
 			mainGroup = FCB402F92F96759A00876787;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				8FB8EAB82FC7529400AB66FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FCB403032F96759A00876787 /* Products */;
@@ -554,6 +567,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8FB8EAB82FC7529400AB66FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.14.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8FB8EAB92FC7529400AB66FA /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FB8EAB82FC7529400AB66FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		8FB8EABB2FC7529400AB66FA /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FB8EAB82FC7529400AB66FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		8FB8EABD2FC7529400AB66FA /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FB8EAB82FC7529400AB66FA /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FCB402FA2F96759A00876787 /* Project object */;
 }
