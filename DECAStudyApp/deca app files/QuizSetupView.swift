@@ -48,8 +48,7 @@ struct QuizSetupView: View {
                         .font(.title3).fontWeight(.bold)
 
                     ForEach(QuizLength.allCases, id: \.self) { length in
-                        let available = length.rawValue <= MarketingDatabase.quizQuestions
-                            .filter { $0.cluster == cluster }.count
+                        let available = cluster == .marketing && length.rawValue <= 100
 
                         Button(action: {
                             if available { selectedLength = length }
