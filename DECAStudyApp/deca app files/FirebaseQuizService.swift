@@ -12,31 +12,38 @@ final class FirebaseQuizService {
 
     private init() {}
 
-    // Use this if Firebase does not automatically pick up your Realtime Database URL.
-    // Check the exact URL in Firebase Console > Realtime Database.
     private let databaseURL = "https://deca-study-app-2ab33-default-rtdb.firebaseio.com"
 
     func fetchMarketingQuestions(completion: @escaping (Result<[QuizQuestion], Error>) -> Void) {
         let ref = Database
             .database(url: databaseURL)
             .reference()
-            .child("exams")
-            .child("marketing")
             .child("questions")
 
         ref.observeSingleEvent(of: .value) { snapshot in
+            print("Firebase path exists:", snapshot.exists())
+            print("Firebase children count:", snapshot.childrenCount)
+
             var questions: [QuizQuestion] = []
 
             for child in snapshot.children {
                 guard
                     let childSnapshot = child as? DataSnapshot,
-                    let dict = childSnapshot.value as? [String: Any],
-                    let quizQuestion = self.parseQuestion(from: dict)
+                    let dict = childSnapshot.value as? [String: Any]
                 else {
                     continue
                 }
 
-                questions.append(quizQuestion)
+                guard let clusterText = dict["cluster"] as? String,
+                      clusterText.lowercased() == "marketing" else {
+                    continue
+                }
+
+                if let quizQuestion = self.parseQuestion(from: dict) {
+                    questions.append(quizQuestion)
+                } else {
+                    print("Could not parse question:", dict)
+                }
             }
 
             if questions.isEmpty {
@@ -60,12 +67,14 @@ final class FirebaseQuizService {
         let options = parseOptions(from: dict)
 
         guard options.count == 4 else {
+            print("Options were not 4:", options)
             return nil
         }
 
         let correctIndex = parseCorrectIndex(from: dict, options: options)
 
         guard correctIndex >= 0, correctIndex < options.count else {
+            print("Invalid correctIndex:", correctIndex)
             return nil
         }
 
@@ -79,21 +88,51 @@ final class FirebaseQuizService {
     }
 
     private func parseOptions(from dict: [String: Any]) -> [String] {
-        if let options = dict["options"] as? [String], options.count == 4 {
+        // Case 1: options saved as Swift/Firebase array
+        if let options = dict["options"] as? [String] {
             return options
         }
 
-        let optionA = dict["optionA"] as? String ?? dict["A"] as? String ?? dict["a"] as? String
-        let optionB = dict["optionB"] as? String ?? dict["B"] as? String ?? dict["b"] as? String
-        let optionC = dict["optionC"] as? String ?? dict["C"] as? String ?? dict["c"] as? String
-        let optionD = dict["optionD"] as? String ?? dict["D"] as? String ?? dict["d"] as? String
+        // Case 2: options saved as array of Any
+        if let options = dict["options"] as? [Any] {
+            return options.compactMap { $0 as? String }
+        }
+
+        // Case 3: options saved as dictionary, like:
+        // options: { 0: "...", 1: "...", 2: "...", 3: "..." }
+        if let optionsDict = dict["options"] as? [String: Any] {
+            let sortedKeys = optionsDict.keys.sorted { key1, key2 in
+                let int1 = Int(key1) ?? 999
+                let int2 = Int(key2) ?? 999
+                return int1 < int2
+            }
+
+            let options = sortedKeys.compactMap { key in
+                optionsDict[key] as? String
+            }
+
+            if options.count == 4 {
+                return options
+            }
+        }
+
+        // Case 4: fallback if fields are named optionA, optionB, optionC, optionD
+        let optionA = dict["optionA"] as? String
+        let optionB = dict["optionB"] as? String
+        let optionC = dict["optionC"] as? String
+        let optionD = dict["optionD"] as? String
 
         return [optionA, optionB, optionC, optionD].compactMap { $0 }
     }
 
     private func parseCorrectIndex(from dict: [String: Any], options: [String]) -> Int {
+        // Your Firebase already has correctIndex: 2
         if let correctIndex = dict["correctIndex"] as? Int {
             return correctIndex
+        }
+
+        if let correctIndexNumber = dict["correctIndex"] as? NSNumber {
+            return correctIndexNumber.intValue
         }
 
         if let correctIndexString = dict["correctIndex"] as? String,
@@ -101,20 +140,16 @@ final class FirebaseQuizService {
             return correctIndex
         }
 
+        // Fallback: match correctAnswer text to one of the options
         if let correctAnswer = dict["correctAnswer"] as? String {
-            let answer = correctAnswer.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+            let cleanedAnswer = correctAnswer
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
 
-            switch answer {
-            case "A": return 0
-            case "B": return 1
-            case "C": return 2
-            case "D": return 3
-            default:
-                if let matchingIndex = options.firstIndex(where: {
-                    $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == answer
-                }) {
-                    return matchingIndex
-                }
+            if let index = options.firstIndex(where: {
+                $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == cleanedAnswer
+            }) {
+                return index
             }
         }
 
