@@ -12,7 +12,9 @@ struct QuizView: View {
     let cluster: ExamCluster
     let questionCount: Int
 
-    // ── State ─────────────────────────────────────────────────────────────
+    // ── State
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
     @State private var questions: [QuizQuestion] = []
     @State private var currentIndex: Int = 0
     @State private var selectedAnswer: Int? = nil
@@ -45,6 +47,42 @@ struct QuizView: View {
                     onRetry: resetQuiz,
                     onExit: { dismiss() }
                 )
+            }
+            else if isLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                    Text("Loading questions...")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+
+            }
+            else if let errorMessage = errorMessage {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(.orange)
+
+                    Text("Unable to load quiz")
+                        .font(.title3)
+                        .fontWeight(.bold)
+
+                    Text(errorMessage)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 30)
+
+                    Button("Try Again") {
+                        loadQuestions()
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(cluster.color)
+                    .cornerRadius(12)
+                }
             } else if let q = current {
                 VStack(spacing: 0) {
                     // ── Header ─────────────────────────────────────────
@@ -177,16 +215,42 @@ struct QuizView: View {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
+
     private func loadQuestions() {
-        let pool = MarketingDatabase.quizQuestions
-            .filter { $0.cluster == cluster }
-            .shuffled()
-        questions = Array(pool.prefix(questionCount))
+        isLoading = true
+        errorMessage = nil
+        questions = []
+        currentIndex = 0
+        selectedAnswer = nil
+        showExplanation = false
+
+        FirebaseQuizService.shared.fetchMarketingQuestions { result in
+            DispatchQueue.main.async {
+                isLoading = false
+
+                switch result {
+                case .success(let loadedQuestions):
+                    let pool = loadedQuestions
+                        .filter { $0.cluster == cluster }
+                        .shuffled()
+
+                    questions = Array(pool.prefix(questionCount))
+
+                    if questions.isEmpty {
+                        errorMessage = "Firebase returned questions, but none matched this exam cluster."
+                    }
+
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
     }
 
     private func nextQuestion() {
         selectedAnswer = nil
         showExplanation = false
+
         if currentIndex + 1 < questions.count {
             currentIndex += 1
         } else {
