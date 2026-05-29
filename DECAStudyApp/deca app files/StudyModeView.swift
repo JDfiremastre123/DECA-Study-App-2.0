@@ -11,28 +11,19 @@ struct StudyModeView: View {
 
     let cluster: ExamCluster
 
-    // Gather terms for this cluster, grouped by category
-    private var allTerms: [StudyTerm] {
-        MarketingDatabase.studyTerms.filter { $0.cluster == cluster }
-    }
-
-    private var categories: [String] {
-        var seen = Set<String>()
-        return allTerms.compactMap { term in
-            guard !seen.contains(term.category) else { return nil }
-            seen.insert(term.category)
-            return term.category
-        }
-    }
-
+    @State private var terms: [StudyTerm] = []
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
     @State private var searchText = ""
     @State private var expandedTermID: UUID? = nil
 
     private var filteredTerms: [StudyTerm] {
-        if searchText.isEmpty { return allTerms }
-        return allTerms.filter {
+        if searchText.isEmpty { return terms }
+        return terms.filter {
             $0.term.localizedCaseInsensitiveContains(searchText) ||
-            $0.definition.localizedCaseInsensitiveContains(searchText)
+            $0.definition.localizedCaseInsensitiveContains(searchText) ||
+            $0.example.localizedCaseInsensitiveContains(searchText) ||
+            $0.category.localizedCaseInsensitiveContains(searchText)
         }
     }
 
@@ -50,93 +41,165 @@ struct StudyModeView: View {
             Color(.systemBackground).ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // ── Header ───────────────────────────────────────────────
-                ZStack {
-                    HStack {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "arrowshape.backward.circle")
-                                .font(.title2)
-                                .foregroundColor(.primary)
-                        }
-                        Spacer()
-                        VStack(spacing: 2) {
-                            Text(cluster.rawValue.uppercased())
-                                .font(.system(size: 16, weight: .heavy))
-                                .foregroundColor(.primary)
-                            Text("Study Mode · \(allTerms.count) terms")
-                                .font(.caption)
-                                .foregroundColor(.black)
-                        }
-                        Spacer()
-                        Image(systemName: cluster.iconName)
-                            .font(.title2)
-                            .foregroundColor(.white)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 14)
-                }
-                .frame(height: 80)
-                .background(cluster.color)
-
-                // ── Search bar ───────────────────────────────────────────
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search terms...", text: $searchText)
-                        .font(.system(size: CGFloat(settings.textSize)))
-                    if !searchText.isEmpty {
-                        Button(action: { searchText = "" }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-                .padding(10)
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(12)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-
-                // ── Term list ────────────────────────────────────────────
-                if filteredTerms.isEmpty {
-                    Spacer()
-                    Text("No terms found for \"\(searchText)\"")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 0, pinnedViews: .sectionHeaders) {
-                            ForEach(filteredCategories, id: \.self) { category in
-                                Section {
-                                    ForEach(filteredTerms.filter { $0.category == category }) { term in
-                                        TermCard(
-                                            term: term,
-                                            isExpanded: expandedTermID == term.id,
-                                            fontSize: CGFloat(settings.textSize)
-                                        ) {
-                                            withAnimation(.spring(response: 0.35)) {
-                                                expandedTermID = expandedTermID == term.id ? nil : term.id
-                                            }
-                                        }
-                                        Divider().padding(.leading, 20)
-                                    }
-                                } header: {
-                                    CategoryHeader(title: category)
-                                }
-                            }
-                        }
-                        .padding(.bottom, 30)
-                    }
-                }
+                header
+                searchBar
+                content
             }
         }
         .navigationBarHidden(true)
+        .onAppear(perform: loadStudyTerms)
+    }
+
+    private var header: some View {
+        ZStack {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "arrowshape.backward.circle")
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                }
+
+                Spacer()
+
+                VStack(spacing: 2) {
+                    Text(cluster.rawValue.uppercased())
+                        .font(.system(size: 16, weight: .heavy))
+                        .foregroundColor(.primary)
+                    Text("Study Mode · \(terms.count) terms")
+                        .font(.caption)
+                        .foregroundColor(.black)
+                }
+
+                Spacer()
+
+                Image(systemName: cluster.iconName)
+                    .font(.title2)
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+        }
+        .frame(height: 80)
+        .background(cluster.color)
+    }
+
+    private var searchBar: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            TextField("Search terms...", text: $searchText)
+                .font(.system(size: CGFloat(settings.textSize)))
+            if !searchText.isEmpty {
+                Button(action: { searchText = "" }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding(10)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if isLoading {
+            Spacer()
+            VStack(spacing: 12) {
+                ProgressView()
+                Text("Loading study terms...")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        } else if let errorMessage = errorMessage {
+            Spacer()
+            VStack(spacing: 14) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.largeTitle)
+                    .foregroundColor(.orange)
+                Text("Unable to load study terms")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                Text(errorMessage)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+                Button("Try Again") {
+                    loadStudyTerms()
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(cluster.color)
+                .cornerRadius(12)
+            }
+            Spacer()
+        } else if filteredTerms.isEmpty {
+            Spacer()
+            Text(searchText.isEmpty
+                 ? "No study terms found for this exam."
+                 : "No terms found for \"\(searchText)\"")
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 30)
+            Spacer()
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 0, pinnedViews: .sectionHeaders) {
+                    ForEach(filteredCategories, id: \.self) { category in
+                        Section {
+                            ForEach(filteredTerms.filter { $0.category == category }) { term in
+                                TermCard(
+                                    term: term,
+                                    isExpanded: expandedTermID == term.id,
+                                    fontSize: CGFloat(settings.textSize)
+                                ) {
+                                    withAnimation(.spring(response: 0.35)) {
+                                        expandedTermID = expandedTermID == term.id ? nil : term.id
+                                    }
+                                }
+                                Divider().padding(.leading, 20)
+                            }
+                        } header: {
+                            CategoryHeader(title: category)
+                        }
+                    }
+                }
+                .padding(.bottom, 30)
+            }
+        }
+    }
+
+    private func loadStudyTerms() {
+        isLoading = true
+        errorMessage = nil
+        terms = []
+        expandedTermID = nil
+
+        FirebaseStudyService.shared.fetchStudyTerms(for: cluster) { result in
+            DispatchQueue.main.async {
+                isLoading = false
+
+                switch result {
+                case .success(let loadedTerms):
+                    terms = loadedTerms
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
     }
 }
 
 // MARK: - Category Header
 struct CategoryHeader: View {
     let title: String
+
     var body: some View {
         HStack {
             Text(title)
@@ -161,7 +224,6 @@ struct TermCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
-                // Term title row
                 HStack {
                     Text(term.term)
                         .font(.system(size: fontSize, weight: .semibold))
@@ -175,22 +237,19 @@ struct TermCard: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 14)
 
-                // Expanded content
                 if isExpanded {
                     VStack(alignment: .leading, spacing: 12) {
-                        // Definition
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Definition")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.secondary)
                                 .textCase(.uppercase)
-                            Text(term.definition)
+                            Text(term.definition.isEmpty ? "No definition provided." : term.definition)
                                 .font(.system(size: fontSize - 1))
                                 .foregroundColor(.primary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
-                        // Example
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Example")
                                 .font(.system(size: 11, weight: .bold))
@@ -200,7 +259,7 @@ struct TermCard: View {
                                 RoundedRectangle(cornerRadius: 2)
                                     .fill(Color.blue)
                                     .frame(width: 3)
-                                Text(term.example)
+                                Text(term.example.isEmpty ? "No example provided." : term.example)
                                     .font(.system(size: fontSize - 2))
                                     .foregroundColor(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -223,3 +282,4 @@ struct TermCard: View {
             .environmentObject(SettingsManager())
     }
 }
+
