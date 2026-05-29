@@ -18,6 +18,18 @@ enum ExamCluster: String, CaseIterable, Identifiable, Codable {
     case personalFinance     = "Personal Financial Literacy"
 
     var id: String { rawValue }
+    
+    var firebaseKey: String {
+        switch self {
+        case .businessAdmin: return "businessAdmin"
+        case .businessMgmt: return "businessMgmt"
+        case .entrepreneurship: return "entrepreneurship"
+        case .finance: return "finance"
+        case .hospitality: return "hospitality"
+        case .marketing: return "marketing"
+        case .personalFinance: return "personalFinance"
+        }
+    }
 
     var iconName: String {
         switch self {
@@ -45,7 +57,7 @@ enum ExamCluster: String, CaseIterable, Identifiable, Codable {
     }
 
     var isAvailable: Bool {
-        self == .marketing
+        true
     }
 }
 
