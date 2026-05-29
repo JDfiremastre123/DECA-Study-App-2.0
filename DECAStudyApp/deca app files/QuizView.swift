@@ -224,7 +224,7 @@ struct QuizView: View {
         selectedAnswer = nil
         showExplanation = false
 
-        FirebaseQuizService.shared.fetchMarketingQuestions { result in
+        FirebaseQuizService.shared.fetchQuestions(for: cluster) { result in
             DispatchQueue.main.async {
                 isLoading = false
 

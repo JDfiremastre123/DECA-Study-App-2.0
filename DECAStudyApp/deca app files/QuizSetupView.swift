@@ -48,7 +48,7 @@ struct QuizSetupView: View {
                         .font(.title3).fontWeight(.bold)
 
                     ForEach(QuizLength.allCases, id: \.self) { length in
-                        let available = cluster == .marketing && length.rawValue <= 100
+                        let available = length.rawValue <= 100
 
                         Button(action: {
                             if available { selectedLength = length }
