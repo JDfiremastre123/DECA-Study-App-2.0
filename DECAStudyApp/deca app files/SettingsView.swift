@@ -84,7 +84,10 @@ struct SettingsView: View {
                                 RoundedRectangle(cornerRadius: 14)
                                     .fill(Color(.systemBackground))
                             )
+                            
                         }
+                        
+                        FeedbackButton()
 
                         // ── Exam History header ───────────────────────────
                         HStack {
@@ -385,3 +388,38 @@ struct SettingsTextField: View {
     }
 }
 
+// MARK: - Feedback Button
+struct FeedbackButton: View {
+    private let feedbackURL = URL(string: "https://docs.google.com/forms/d/e/1FAIpQLSe5fQmKxovRnSP8tafl9teqcCUtaOPvZ-y7TxP9Qq8fKvtkfw/viewform?usp=header")!
+
+    var body: some View {
+        Link(destination: feedbackURL) {
+            HStack(spacing: 14) {
+                Image(systemName: "bubble.left.and.bubble.right.fill")
+                    .foregroundColor(.blue)
+                    .frame(width: 24)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Send Feedback")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+
+                    Text("Report bugs or suggest improvements")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.up.right.square")
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color(.systemBackground))
+            )
+        }
+    }
+}

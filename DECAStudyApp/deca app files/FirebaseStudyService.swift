@@ -26,7 +26,7 @@ final class FirebaseStudyService {
         let ref = Database
             .database(url: databaseURL)
             .reference()
-            .child("studyTerms")
+            .child("terms")
 
         ref.observeSingleEvent(of: .value) { snapshot in
             print("Study terms path exists:", snapshot.exists())
